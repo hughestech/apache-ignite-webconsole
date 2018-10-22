@@ -1,0 +1,113 @@
+
+# creating deployment for the backend; specify a Docker Image 
+# in the 'image' field.
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: backend
+  name: backend
+  namespace: web-console
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: backend
+    spec:
+      containers:
+      - env:
+        - name: mail_auth_pass
+        - name: mail_auth_user
+        - name: mail_from
+        - name: mail_greeting
+        - name: mail_service
+        - name: mail_sign
+        - name: mongodb_url
+          value: mongodb://mongodb.mongodb.svc.cluster.local/console
+        - name: server_host
+          value: "0.0.0.0"
+        - name: server_port
+          value: "3000"
+        - name: server_sessionSecret
+          value: CHANGE_ME
+        image: 
+        name: backend
+        resources: {}
+      restartPolicy: Always
+      # remove this property if you use a public Docker repository
+      imagePullSecrets:
+        - name: registrykey
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: backend
+  namespace: web-console
+  labels:
+    app: backend
+spec:
+  ports:
+  - name: "backend"
+    port: 3000
+    targetPort: 3000
+  selector:
+    app: backend
+status:
+  loadBalancer: {}
+
+---
+# creating deployment for the frontend; specify a Docker Image 
+# in the 'image' field.
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: frontend
+  namespace: web-console
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - image: 
+        name: frontend
+        ports:
+        - containerPort: 80
+        resources: {}
+      restartPolicy: Always
+      # remove this property if you use a public Docker repository
+      imagePullSecrets:
+        - name: registrykey      
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: frontend
+  namespace: web-console
+  labels:
+    app: frontend
+spec:
+  ports:
+  - name: "frontend"
+    port: 80
+    targetPort: 80
+  selector:
+    app: frontend
+  type: LoadBalancer
+status:
+  loadBalancer: {}
