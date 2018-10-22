@@ -1,8 +1,8 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: web-agent
-  namespace: ignite
+  name: {{ .Chart.Name }}-web-agent
+  namespace: {{ .Chart.Name }}
 spec:
   selector:
     matchLabels:
@@ -15,23 +15,20 @@ spec:
     spec:
       serviceAccountName: ignite-cluster
       containers:
-      - name: web-agent
-        image: apacheignite/web-agent:mytag3
-        resources:
-          limits:
-            cpu: 500m 
-            memory: 500Mi
-        env:
-        - name: DRIVER_FOLDER
-          value: "./jdbc-drivers"
-        - name: NODE_URI
-          value: "http://ignite-service.ignite.svc.cluster.local:8080"
-        - name: SERVER_URI
-          value: "http://frontend.web-console.svc.cluster.local"
-        - name: TOKENS
-          value: ""
-        - name: NODE_LOGIN
-          value: web-agent
-        - name: NODE_PASSWORD
-          value: password
+        - name: web-agent
+          image: apacheignite/web-agent:mytag3
+          imagePullPolicy: Always
+          env:
+            - name: DRIVER_FOLDER
+              value: "./jdbc-drivers"
+            - name: NODE_URI
+              value: "http://ignite-service.ignite.svc.cluster.local:8080"
+            - name: SERVER_URI
+              value: "http://frontend.web-console.svc.cluster.local"
+            - name: TOKENS
+              value: ""
+            - name: NODE_LOGIN
+              value: web-agent
+            - name: NODE_PASSWORD
+              value: password
           

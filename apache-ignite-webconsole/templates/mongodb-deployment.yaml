@@ -1,31 +1,24 @@
 ---
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: mongodb
-
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   creationTimestamp: null
   name: mongodb-claim0
-  namespace: mongodb
+  namespace: {{ .Chart.Name }}
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
       storage: 100Mi
-status: {}
 
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: mongodb
-  namespace: mongodb
+  name: {{ .Chart.Name }}-mongo
+  namespace: {{ .Chart.Name }}
   labels: 
     app: mongodb
 spec:
@@ -39,26 +32,31 @@ spec:
         app: mongodb
     spec:
       containers:
-      - image: mongo:3.4
-        name: mongodb
-        resources: {}
-        volumeMounts:
-        - mountPath: /data/db
-          name: mongodb-claim0
-      restartPolicy: Always
+        - name: mongodb
+          image: centos/mongodb-32-centos7      
+          resources: {}
+          volumeMounts:
+          - mountPath: /data/db
+            name: mongodb-claim0
+          restartPolicy: Always
+          volumes:
+          - name: mongodb-claim0
+            persistentVolumeClaim:
+              claimName: mongodb-claim0
       volumes:
-      - name: mongodb-claim0
-        persistentVolumeClaim:
-          claimName: mongodb-claim0
-status: {}
+        - emptyDir:
+            medium: Memory
+          name: mongodb-claim0
+
+
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
-  name: mongodb
-  namespace: mongodb
+  name: {{ .Chart.Name }}-mongodb
+  namespace: {{ .Chart.Name }}
   labels:
     app: mongodb
 spec:

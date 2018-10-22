@@ -1,4 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Chart.Name }}
 
+---
 # creating deployment for the backend; specify a Docker Image 
 # in the 'image' field.
 apiVersion: extensions/v1beta1
@@ -7,8 +13,8 @@ metadata:
   creationTimestamp: null
   labels:
     app: backend
-  name: backend
-  namespace: web-console
+  name: {{ .Chart.Name }}
+  namespace: {{ .Chart.Name }}
 spec:
   replicas: 1
   strategy: {}
@@ -19,6 +25,8 @@ spec:
         app: backend
     spec:
       containers:
+      - image: apacheignite/web-console-backend
+        name: backend
       - env:
         - name: mail_auth_pass
         - name: mail_auth_user
@@ -34,8 +42,6 @@ spec:
           value: "3000"
         - name: server_sessionSecret
           value: CHANGE_ME
-        image: 
-        name: backend
         resources: {}
       restartPolicy: Always
       # remove this property if you use a public Docker repository
@@ -48,8 +54,8 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
-  name: backend
-  namespace: web-console
+  name: {{ .Chart.Name }}-backend
+  namespace: {{ .Chart.Name }}
   labels:
     app: backend
 spec:
@@ -61,7 +67,6 @@ spec:
     app: backend
 status:
   loadBalancer: {}
-
 ---
 # creating deployment for the frontend; specify a Docker Image 
 # in the 'image' field.
@@ -69,8 +74,8 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: frontend
-  namespace: web-console
+  name: {{ .Chart.Name }}-frontend
+  namespace: {{ .Chart.Name }}
 spec:
   replicas: 1
   strategy: {}
@@ -81,24 +86,23 @@ spec:
         app: frontend
     spec:
       containers:
-      - image: 
-        name: frontend
-        ports:
-        - containerPort: 80
-        resources: {}
-      restartPolicy: Always
+        - name: frontend
+          image: apacheignite/web-console-frontend
+          ports:
+          - containerPort: 80          
+          restartPolicy: Always
       # remove this property if you use a public Docker repository
       imagePullSecrets:
         - name: registrykey      
-status: {}
+
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
-  name: frontend
-  namespace: web-console
+  name: {{ .Chart.Name }}-frontend
+  namespace: {{ .Chart.Name }}
   labels:
     app: frontend
 spec:
